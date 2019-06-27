@@ -2,6 +2,7 @@ package com.codepath.debuggingchallenges.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
@@ -30,15 +31,16 @@ public class MoviesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        movies = new ArrayList<>();
         fetchMovies();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movies);
         rvMovies = findViewById(R.id.rvMovies);
-        // Create the adapter to convert the array to views
         adapter = new MoviesAdapter(movies);
-
-        // Attach the adapter to a ListView
         rvMovies.setAdapter(adapter);
+        rvMovies.setLayoutManager(new LinearLayoutManager(this));
+
+        // Create the adapter to convert the array to views
 
     }
 
@@ -53,12 +55,21 @@ public class MoviesActivity extends AppCompatActivity {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     JSONArray moviesJson = response.getJSONArray("results");
-                    movies = Movie.fromJSONArray(moviesJson);
+                    movies.addAll(Movie.fromJSONArray(moviesJson));
+                    adapter.notifyDataSetChanged();
+
                 } catch (JSONException e) {
-                    Toast.makeText(MoviesActivity.this, "Failed to Get movie", Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
+//                    Toast.makeText(MoviesActivity.this, "Failed to Get movie", Toast.LENGTH_LONG).show();
+//                    e.printStackTrace();
                 }
             }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                Toast.makeText(MoviesActivity.this, "Failed to Get movie", Toast.LENGTH_LONG).show();
+
+            }
         });
+
     }
 }
